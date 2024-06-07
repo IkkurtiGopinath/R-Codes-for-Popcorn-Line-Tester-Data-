@@ -1,0 +1,56 @@
+##### AMMI Analysis of Genotype × location interaction on Superior Crosses ################
+Data_LT <- read.csv("TFV.csv")
+Data_LT
+library(metan)
+modelAMMI1.1<- performs_ammi(Data_LT,
+env = SITE,
+gen = Cross,
+rep = REP,
+resp = TFV,
+scale=FALSE)
+modelAMMI1.1
+plot_scores(modelAMMI1.1)
+plot_scores(modelAMMI1.1, type = 2, repel = TRUE, size.tex.gen = 2.5)
+
+Data_LT_GY <- read.csv("GY.csv")
+Data_LT_GY
+modelAMMI1.2<- performs_ammi(Data_LT,
+env = SITE,
+gen = Cross,
+rep = REP,
+resp = GY,
+scale=FALSE)
+modelAMMI1.2
+plot_scores(modelAMMI1.2)
+plot_scores(modelAMMI1.2, type = 2, repel = TRUE, size.tex.gen = 2.5)
+
+################### MTSI for Hybrids #######################
+Data_P <- read.csv("Popcorn.csv")
+
+MTSI_index3 <- Data_P%>%
+  waasb(ENV, GEN, REP,
+        by=ENV,
+        resp = c(TFV, PEV, SFS, PR, GY)) %>%
+  mtsi(verbose = FALSE, index = "waasb")
+MTSI_index3
+gmd(MTSI_index3, "FA") %>% print_table()
+gmd(MTSI_index3, "scores_gen") %>% print_table()
+
+mod <- gamem(Data_P,
+             gen = GEN,
+             rep = REP,
+             by=ENV,
+             resp = c(TFV, PEV, SFS, PR, GY))
+?mgidi()
+mgidi_index <- mgidi(mod,use_data = "blup",
+                     ideotype = c("h, h, h, h, h"),
+                     weights = c(1, 1, 1, 1, 1),
+                     SI = 30) # Selection intensity
+mgidi_index
+gmd(mgidi_index, "FA") %>% print_table()
+gmd(mgidi_index, "scores_gen") %>% print_table()
+p1 <- plot(mgidi_index$data, SI = 20)
+p2 <- plot(mgidi_index, type = "contribution")
+p1
+p2
+arrange_ggplot(p1, p2)
